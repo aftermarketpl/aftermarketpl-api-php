@@ -1,0 +1,24 @@
+{
+    "name": "aftermarketpl/api",
+    "description": "Boilerplate package for creating other packages.",
+    "keywords": ["aftermarket", "api"],
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Michal Pleban",
+            "email": "kontakt@aftermarket.pl"
+        }
+    ],
+    "type": "project",
+    "require": {
+		"php": ">=5.6"
+    },
+    "require-dev": {
+		"phpunit/phpunit": "6.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Aftermarketpl\\Api\\": "src/"
+        }
+    }
+}
