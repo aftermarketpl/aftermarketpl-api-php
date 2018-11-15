@@ -1,15 +1,31 @@
-Composer Library Template
-=========================
+# AfterMarket.pl API client class for PHP
 
-If you are trying to create a new PHP Composer library, whether it will be going to submitted to packagist.org or just in your Github account, this template of files will surely help you make the process a lot easier and faster.
+This library allows to issue calls to the AfterMarket.pl public API from PHP.
 
-Features
---------
+## Quick start
 
-* PSR-4 autoloading compliant structure
-* Unit-Testing with PHPUnit
-* Comprehensive Guides and tutorial
-* Easy to use to any framework or even a plain php file
+Install the library using composer:
 
+```
+composer install aftermarketpl/api
+```
 
-I encourage that you put more information on this readme file instead of leaving it as is. See [How to make a README file](http://www.darwinbiler.com/designing-and-making-the-readme-file-for-your-github-repository/) for more info.
+Create the API client object, providing your API key.
+[Click here to obtain your API key.](https://www.aftermarket.pl/API/Create/)
+
+```php
+$client = new Aftermarketpl\Api\Client(array(
+    "key" => "... your public key ...",
+    "secret" => "... your secret key ...",
+));
+```
+
+Call an API function and obtain a result.
+[Click here to see the list of API functions.](https://json.aftermarket.pl/)
+
+```php
+$ret = $client->send("/domain/check", array(
+    "names" => array("check-1.pl", "check-2.pl"),
+));
+print_r($ret);
+```

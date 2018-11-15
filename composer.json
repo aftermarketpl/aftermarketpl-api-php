@@ -1,6 +1,6 @@
 {
     "name": "aftermarketpl/api",
-    "description": "Boilerplate package for creating other packages.",
+    "description": "Client for the AfterMarket.pl public API.",
     "keywords": ["aftermarket", "api"],
     "license": "Apache-2.0",
     "authors": [
@@ -9,7 +9,7 @@
             "email": "kontakt@aftermarket.pl"
         }
     ],
-    "type": "project",
+    "type": "library",
     "require": {
 		"php": ">=5.6"
     },
