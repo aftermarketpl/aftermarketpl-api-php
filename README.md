@@ -24,8 +24,15 @@ Call an API function and obtain a result.
 [Click here to see the list of API functions.](https://json.aftermarket.pl/)
 
 ```php
-$ret = $client->send("/domain/check", array(
-    "names" => array("check-1.pl", "check-2.pl"),
-));
-print_r($ret);
+try
+{
+    $ret = $client->send("/domain/check", array(
+        "names" => array("check-1.pl", "check-2.pl"),
+    ));
+    print_r($ret);
+}
+catch(Aftermarketpl\Api\Exception\Exception $e)
+{
+    print_r($e->getResponse());
+}
 ```

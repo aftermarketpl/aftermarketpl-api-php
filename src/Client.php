@@ -1,10 +1,10 @@
 <?php namespace Aftermarketpl\Api;
 
 /**
-*  Class to connect to the AfterMarket.pl API server.
-*
-*  @author MichalPleban
-*/
+ * Class to connect to the AfterMarket.pl API server.
+ *
+ * @author MichalPleban
+ */
 class Client
 {
     const DEFAULT_URL = "https://api.aftermarket.pl";
@@ -32,7 +32,7 @@ class Client
     /**
      * Class constructor. 
      *
-     * Creates a new object to connecto to the API.
+     * Creates a new object to connect to the API.
      *
      * @param array $options the options for connectint to the API - see the README file.
      */
@@ -79,9 +79,41 @@ class Client
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
         $ret = curl_exec($ch);
         
+        $errNo = curl_errno($ch);
+        if($errNo)
+        {
+            $errMsg = curl_error($ch);
+            curl_close($ch);
+            throw new Exception\ConnectionException($errMsg);
+        }
+
         curl_close($ch);
-        
         $json = json_decode($ret);
+
+        if(!$json->ok)
+        {
+            switch($json->status)
+            {
+                case 401:
+                    throw new Exception\InvalidStatusException($json->error, $json);
+                case 402:
+                    throw new Exception\InsufficientBalanceException($json->error, $json);
+                case 403:
+                    throw new Exception\AccessDeniedException($json->error, $json);
+                case 404:
+                    throw new Exception\NotFoundException($json->error, $json);
+                case 405:
+                    throw new Exception\DomainOperationException($json->error, $json);
+                case 500:
+                    throw new Exception\AuthenticationException($json->error, $json);
+                case 501:
+                    throw new Exception\InvalidMethodException($json->error, $json);
+                case 502:
+                    throw new Exception\OperationLimitException($json->error, $json);
+                default:
+                    throw new Exception\GenericException($json->error, $json);
+            }
+        }
         
         return $json->data;
     }
