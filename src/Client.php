@@ -7,6 +7,7 @@
 */
 class Client
 {
+
     const DEFAULT_URL = "https://api.aftermarket.pl";
 
     /**
