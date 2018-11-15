@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 
 class ClientTest extends TestCase
 {
-    public function testIsThereAnySyntaxError()
+    public function testSyntax()
     {
         $var = new Aftermarketpl\Api\Client;
         $this->assertTrue(is_object($var));
