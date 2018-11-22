@@ -1,10 +1,10 @@
 # AfterMarket.pl API client class for PHP
 
-This library allows to issue calls to the AfterMarket.pl public API from PHP.
+This library allows you to issue calls to the AfterMarket.pl public API from PHP.
 
 ## Quick start
 
-Install the library using composer:
+Install the library using `composer`.
 
 ```
 composer require aftermarketpl/api
@@ -26,10 +26,10 @@ Call an API function and obtain a result.
 ```php
 try
 {
-    $ret = $client->send("/domain/check", array(
+    $result = $client->send("/domain/check", array(
         "names" => array("check-1.pl", "check-2.pl"),
     ));
-    print_r($ret);
+    print_r($result);
 }
 catch(Aftermarketpl\Api\Exception\Exception $e)
 {
@@ -38,7 +38,7 @@ catch(Aftermarketpl\Api\Exception\Exception $e)
 ```
 ## Installation
 
-You can install the API library on two ways.
+You can install the API library in two ways.
 
 1. The easiest way is to use `composer`:
 
@@ -46,11 +46,78 @@ You can install the API library on two ways.
 composer require aftermarketpl/api
 ```
 
-2. If you are not using `composer`, you can install the library manually. 
+2. If you are not using `composer`, you can install the library manually.
 In order to do that, download and unpack the files (only the `lib` directory is necessary),
 and include the library's autoloader in your PHP files:
 
 ```php
-require "path/to/the/src/folder/autoload.php";
+require "... path to the lib folder.../autoload.php";
 ```
 
+## API keys
+
+To connect to the API, you need an API key.
+[Click here to obtain your API key.](https://www.aftermarket.pl/API/Create/)
+
+You can have more than one API key.
+Each API key has a set of operations which can be performed using that key.
+You can also limit the key usage to a specific set of IP addresses.
+
+After creating an API key, you can modify its permissions, revoke or disable it
+on the Aftermarket.pl website.
+
+## Reference
+
+### Creating the class
+
+To create a new client class, use:
+
+```php
+$client = new Aftermarketpl\Api\Client($options);
+```
+
+The `$options` variable is an array, which can contain the following values:
+
+* `key` - The public key used to connect to the API.
+* `secret` - The secret key used to connect to the API.
+* `debug` - If set to `true`, the CURL calls to the API will be performed with the CURL_VERBOSE flag, allowing you to debug connection errors.
+* `url` - Alternative URL to use when connecting to the API. You don't normally need to use this option.
+
+The parameters `key` and `secret` are necessary for making calls to the API.
+However, you do not need to specify them at class creation time - see the section _Modifying the class_ below.
+
+### Making an API call
+
+```php
+$result = $client->send($command, $parameters);
+```
+
+The function `send()` is used to send an API command to the server.
+You need to specify two parameters:
+
+* `$command` - The name of the command, for example `"/domain/check"`. [Click here to see the list of API functions.](https://json.aftermarket.pl/)
+* `$parameters` - Array containing the command parameters. The actual contents depend on the command. Can be omitted of the command does not take any parameters.
+
+The return value is the data structure returned by the command. Its contents also depend on the actual command used - see the API reference for details on what is being returned by each command.
+
+### Exceptions
+
+If something goes wrong, a subclass of `Aftermarketpl\Api\Exception\Exception` is thrown.
+This class extends the standard `Exception` class with the method `getResponse()`,
+which returns the contents of the response received from the server.
+This value is, of course, only valid when the actual call to the server has been made;
+if the error occurred before that, the value is `null`.
+
+### Modifying the class
+
+You can modify the created client class in runtime, using the following functions:
+
+```php
+$client->setAuth($key, $secret);`
+$client->getAuthKey();
+$client->getAuthSecret();
+$client->setDebug($debug);
+$client->getDebug();
+$client->setUrl($url);
+$client->getUrl();
+```
