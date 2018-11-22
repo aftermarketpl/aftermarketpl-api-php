@@ -68,6 +68,18 @@ class Client
      */
     public function send($command, $params = array())
     {
+        if(!preg_match("|^(/[a-z]+)+$|", $command))
+            throw new Exception\InvalidMethodException("Malformed command name: " . $command);
+            
+        if(!$this->apiKey || !$this->apiSecret)
+            throw new Exception\AuthenticationException("Missing authentication data");
+        
+        if(!filter_var($this->apiUrl))
+            throw new Exception\ConnectionException("Malformed API URL: " . $this->apiUrl);
+        $protocol = parse_url($this->apiUrl, PHP_URL_SCHEME);
+        if($protocol != "http" && $protocol != "https")
+            throw new Exception\ConnectionException("Malformed API URL: " . $this->apiUrl);
+
         $url = $this->apiUrl . $command;
         
         $ch = curl_init($url);
@@ -148,5 +160,45 @@ class Client
     public function getAuthSecret()
     {
         return $this->apiSecret;
+    }
+
+    /**
+     * Set the URL used to connect to the API.
+     * 
+     * @param string $url the URL.
+     */
+    public function setUrl($url)
+    {
+        $this->apiUrl = $url;
+    }
+
+    /**
+     * Retrieve current API connection URL.
+     *
+     * @return string the API URL.
+     */
+    public function getUrl()
+    {
+        return $this->apiUrl;
+    }
+
+    /**
+     * Set the connection debug flag.
+     * 
+     * @param boolean $debug the debug flag.
+     */
+    public function setDebug($debug)
+    {
+        $this->apiDebug = $debug ? true : false;
+    }
+
+    /**
+     * Retrieve current debug flag.
+     *
+     * @return boolean the debug flag.
+     */
+    public function getDebug()
+    {
+        return $this->apiDebug;
     }
 }
