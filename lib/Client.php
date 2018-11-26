@@ -68,20 +68,19 @@ class Client
      */
     public function send($command, $params = array())
     {
-        if(!preg_match("|^(/[a-z]+)+$|", $command))
-            throw new Exception\InvalidMethodException("Malformed command name: " . $command);
-            
-        if(!$this->apiKey || !$this->apiSecret)
-            throw new Exception\AuthenticationException("Missing authentication data");
-        
-        if(!filter_var($this->apiUrl))
-            throw new Exception\ConnectionException("Malformed API URL: " . $this->apiUrl);
-        $protocol = parse_url($this->apiUrl, PHP_URL_SCHEME);
-        if($protocol != "http" && $protocol != "https")
-            throw new Exception\ConnectionException("Malformed API URL: " . $this->apiUrl);
+        $this->preCheck($command, $params);
 
         $url = $this->apiUrl . $command;
-        
+        $ret = $this->sendCurl($url, $params);
+        $json = json_decode($ret);
+
+        $this->postCheck($json);
+
+        return $json->data;
+    }
+    
+    private function sendCurl($url, $params)
+    {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_USERPWD, $this->apiKey . ":" . $this->apiSecret);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -100,8 +99,27 @@ class Client
         }
 
         curl_close($ch);
-        $json = json_decode($ret);
-
+        
+        return $ret;
+    }
+    
+    private function preCheck($command, $params)
+    {
+        if(!preg_match("|^(/[a-z]+)+$|", $command))
+            throw new Exception\InvalidMethodException("Malformed command name: " . $command);
+            
+        if(!$this->apiKey || !$this->apiSecret)
+            throw new Exception\AuthenticationException("Missing authentication data");
+        
+        if(!filter_var($this->apiUrl))
+            throw new Exception\ConnectionException("Malformed API URL: " . $this->apiUrl);
+        $protocol = parse_url($this->apiUrl, PHP_URL_SCHEME);
+        if($protocol != "http" && $protocol != "https")
+            throw new Exception\ConnectionException("Malformed API URL: " . $this->apiUrl);
+    }
+    
+    private function postCheck($json)
+    {
         if(!$json->ok)
         {
             switch($json->status)
@@ -126,8 +144,6 @@ class Client
                     throw new Exception\GenericException($json->error, $json);
             }
         }
-        
-        return $json->data;
     }
 
     /**
