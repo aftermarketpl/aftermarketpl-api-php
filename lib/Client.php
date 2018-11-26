@@ -71,12 +71,37 @@ class Client
         $this->preCheck($command, $params);
 
         $url = $this->apiUrl . $command;
-        $ret = $this->sendCurl($url, $params);
+        if(class_exists("\GuzzleHttp\Client"))
+        {
+            $ret = $this->sendGuzzle($url, $params);
+        }
+        else
+        {
+            $ret = $this->sendCurl($url, $params);
+        }
         $json = json_decode($ret);
 
         $this->postCheck($json);
 
         return $json->data;
+    }
+    
+    private function sendGuzzle($url, $params)
+    {
+        try
+        {
+            $client = new \GuzzleHttp\Client();
+            $response = $client->request("POST", $url, array(
+                "form_params" => $params,
+                "auth" => array($this->apiKey, $this->apiSecret),
+                "debug" => $this->apiDebug,
+            ));
+            return $response->getBody();
+        }
+        catch(\GuzzleHttp\Exception\TransferException $e)
+        {
+            throw new Exception\ConnectionException($e->getMessage());
+        }
     }
     
     private function sendCurl($url, $params)
