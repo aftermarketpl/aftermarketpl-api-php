@@ -73,7 +73,7 @@ class Client
         $url = $this->apiUrl . $command;
         if(class_exists("\GuzzleHttp\Client"))
         {
-            $ret = $this->sendGuzzle($url, $params);
+            $ret = $this->sendGuzzle($url, $params, false);
         }
         else
         {
@@ -86,19 +86,61 @@ class Client
         return $json->data;
     }
     
-    private function sendGuzzle($url, $params)
+    /**
+     * Send the API command to the server asynchronously.
+     *
+     * @param string $command name of the command to send, for example "/domain/add".
+     * @param array $params parameters of the command.
+     *
+     * @return mixed response from the API server.
+     */
+    public function sendAsync($command, $params = array())
+    {
+        $this->preCheck($command, $params);
+
+        $url = $this->apiUrl . $command;
+        $promise = $this->sendGuzzle($url, $params, true);
+        $me = $this;
+        $ret = $promise->then(
+            function($response) use(&$me)
+            {
+                $json = json_decode($response->getBody());
+                $me->postCheck($json);
+                return $json->data;
+            },
+            function($exception)
+            {
+                throw new Exception\ConnectionException($exception->getMessage());
+            }
+        );
+        
+        return $ret;
+//        $ret = new Promise($promise, $this);
+//        return $ret;
+    }
+    
+    private function sendGuzzle($url, $params, $async = false)
     {
         try
         {
             $client = new \GuzzleHttp\Client();
-            $response = $client->request("POST", $url, array(
+            $params = array(
                 "form_params" => $params,
                 "auth" => array($this->apiKey, $this->apiSecret),
                 "debug" => $this->apiDebug,
-            ));
-            return $response->getBody();
+            );
+            if(!$async)
+            {
+                $response = $client->request("POST", $url, $params);
+                return $response->getBody();
+            }
+            else
+            {
+                $promise = $client->requestAsync("POST", $url, $params);
+                return $promise;
+            }
         }
-        catch(\GuzzleHttp\Exception\TransferException $e)
+        catch(Exception $e)
         {
             throw new Exception\ConnectionException($e->getMessage());
         }
@@ -128,7 +170,7 @@ class Client
         return $ret;
     }
     
-    private function preCheck($command, $params)
+    public function preCheck($command, $params)
     {
         if(!preg_match("|^(/[a-z]+)+$|", $command))
             throw new Exception\InvalidMethodException("Malformed command name: " . $command);
@@ -143,7 +185,7 @@ class Client
             throw new Exception\ConnectionException("Malformed API URL: " . $this->apiUrl);
     }
     
-    private function postCheck($json)
+    public function postCheck($json)
     {
         if(!$json->ok)
         {

@@ -98,6 +98,13 @@ class ClientTest extends TestCase
         unset($var);
     }
 
+    public function testMethodSendAsync()
+    {
+        $var = new Aftermarketpl\Api\Client;
+        $this->assertTrue(method_exists($var, "sendAsync"));
+        unset($var);
+    }
+
     public function testExceptionInvalidMethod()
     {
         $this->expectException("\Aftermarketpl\Api\Exception\InvalidMethodException");
@@ -108,7 +115,6 @@ class ClientTest extends TestCase
         $var->send("test", array());
         unset($var);
     }
-
 
     public function testExceptionNoAuthenticationData()
     {
@@ -140,6 +146,50 @@ class ClientTest extends TestCase
             "secret" => "secret",
         ));
         $var->send("/test", array());
+        unset($var);
+    }
+
+    public function testAsyncExceptionInvalidMethod()
+    {
+        $this->expectException("\Aftermarketpl\Api\Exception\InvalidMethodException");
+        $var = new Aftermarketpl\Api\Client(array(
+            "key" => "key",
+            "secret" => "secret",
+        ));
+        $var->sendAsync("test", array());
+        unset($var);
+    }
+
+    public function testAsyncExceptionNoAuthenticationData()
+    {
+        $this->expectException("\Aftermarketpl\Api\Exception\AuthenticationException");
+        $var = new Aftermarketpl\Api\Client(array(
+        ));
+        $var->sendAsync("/test", array());
+        unset($var);
+    }
+
+    public function testAsyncExceptionMalformedUrl()
+    {
+        $this->expectException("\Aftermarketpl\Api\Exception\ConnectionException");
+        $var = new Aftermarketpl\Api\Client(array(
+            "url" => "incorrect",
+            "key" => "key",
+            "secret" => "secret",
+        ));
+        $var->sendAsync("/test", array());
+        unset($var);
+    }
+
+    public function testAsyncExceptionWrongProtocol()
+    {
+        $this->expectException("\Aftermarketpl\Api\Exception\ConnectionException");
+        $var = new Aftermarketpl\Api\Client(array(
+            "url" => "ftp://incorrect",
+            "key" => "key",
+            "secret" => "secret",
+        ));
+        $var->sendAsync("/test", array());
         unset($var);
     }
 }

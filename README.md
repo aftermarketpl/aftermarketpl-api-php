@@ -24,18 +24,34 @@ Call an API function and obtain a result.
 [Click here to see the list of API functions.](https://json.aftermarket.pl/)
 
 ```php
-try
-{
+try {
     $result = $client->send("/domain/check", array(
         "names" => array("check-1.pl", "check-2.pl"),
     ));
     print_r($result);
 }
-catch(Aftermarketpl\Api\Exception\Exception $e)
-{
-    print_r($e->getResponse());
+catch(Aftermarketpl\Api\Exception\Exception $exception) {
+    print_r($exception->getResponse());
 }
 ```
+
+Use Guzzle-style asynchronous call:
+
+```php
+$promise = $client->sendAsync("/domain/check", array(
+    "names" => array("check-1.pl", "check-2.pl"),
+));
+$promise->then(
+    function($result) {
+        print_r($result);
+    },
+    function($exception) {
+        print_r($exception->$getResponse();
+    }
+);
+$promise->wait();
+```
+
 ## Installation
 
 You can install the API library in two ways.
@@ -53,6 +69,9 @@ and include the library's autoloader in your PHP files:
 ```php
 require "... path to the lib folder.../autoload.php";
 ```
+
+In the latter case, you don't need the Guzzle library if you don't plan on using asynchronous requests
+- the library will switch to plain CURL in that case.
 
 ## API keys
 
@@ -86,7 +105,7 @@ The `$options` variable is an array, which can contain the following values:
 The parameters `key` and `secret` are necessary for making calls to the API.
 However, you do not need to specify them at class creation time - see the section _Modifying the class_ below.
 
-### Making an API call
+### Making API calls
 
 ```php
 $result = $client->send($command, $parameters);
@@ -98,7 +117,22 @@ You need to specify two parameters:
 * `$command` - The name of the command, for example `"/domain/check"`. [Click here to see the list of API functions.](https://json.aftermarket.pl/)
 * `$parameters` - Array containing the command parameters. The actual contents depend on the command. Can be omitted of the command does not take any parameters.
 
-The return value is the data structure returned by the command. Its contents also depend on the actual command used - see the API reference for details on what is being returned by each command.
+The return value is the data structure returned by the API command. 
+Its contents also depend on the actual command used - see the API reference for details on what is being returned by each command.
+
+### Asynchronous calls
+
+```php
+$promise = $client->sendAsync($command, $parameters);
+$promise->then(function($response) { ... }, function($exception) { ... });
+$response = $promise->wait();
+```
+
+The function `sendAsync()` uses the Guzzle library to send an API call asynchronously.
+The input parameters are the same as with the `send()` function, 
+but the returned value is a promise which resolves to the data structure returned from the API command.
+
+Refer to Guzzle documentation for information on how to use promises with asynchronous calls.
 
 ### Exceptions
 
