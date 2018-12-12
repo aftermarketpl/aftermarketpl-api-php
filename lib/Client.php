@@ -7,7 +7,7 @@
  */
 class Client
 {
-    const DEFAULT_URL = "https://api.aftermarket.pl";
+    const DEFAULT_URL = "https://json.aftermarket.pl";
 
     /**
      * @var string $apiUrl the location of the API server.
